@@ -203,7 +203,7 @@ class WowsCaptain(Star):
             await self._send(event, HELP)
         elif cmd in {"状态", "status"}:
             binding = self.storage.get_binding(self._scope(event))
-            await self._send(event, compact({"插件版本": "1.0.1", "绑定": binding,
+            await self._send(event, compact({"插件版本": "1.0.2", "绑定": binding,
                 "WG应用ID": "已配置" if self.wg.application_id else "未配置：战绩查询需要此项",
                 "知识条目": len(self.knowledge.entries) + len(self.user_knowledge.entries),
                 "知识载入异常": self.knowledge.errors + self.user_knowledge.errors,
@@ -580,8 +580,13 @@ class WowsCaptain(Star):
     async def terminate(self):
         if self._sampler:
             self._sampler.cancel()
-            with contextlib.suppress(asyncio.CancelledError):
+            try:
                 await self._sampler
+            except asyncio.CancelledError:
+                pass
+            except Exception as exc:
+                logger.warning("WoWS sampler had stopped before shutdown (%s)",type(exc).__name__)
+            self._sampler=None
         await self.wg.close()
         await self.haojian.close()
         self.storage.close()

@@ -131,12 +131,14 @@ class StatsTests(unittest.IsolatedAsyncioTestCase):
                         {"ship_id": 13, "pvp": {"battles": 60, "wins": 50, "damage_dealt": 6000000}}]
 
         service = StatsService(FleetClient(), self.storage)
-        result = await service.class_overview("asia", 1, "ca")
+        with patch("core.stats.time.time",return_value=1000):
+            result = await service.class_overview("asia", 1, "ca")
         self.assertEqual(result["metrics"]["battles"], 40)
         self.assertEqual(result["metrics"]["avg_damage"], 40000)
         self.assertEqual(result["metrics"]["win_rate"], 65)
         self.assertEqual(len(result["rows"]), 2)
-        surface = await service.class_overview("asia", 1, "surface")
+        with patch("core.stats.time.time",return_value=1001):
+            surface = await service.class_overview("asia", 1, "surface")
         self.assertEqual(surface["metrics"]["battles"], 40)
         # Fleet/class totals have a different scope and must not corrupt account history.
         self.assertEqual(self.storage.history("asia", 1), [])

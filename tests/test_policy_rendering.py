@@ -33,6 +33,21 @@ class PolicyTests(unittest.TestCase):
         p.finish("a",sent=False)
         self.assertIsNone(p.consider("a","队友不给力",now=120))
 
+    def test_english_substrings_do_not_reopen_game_discussion(self):
+        p=ConversationPolicy()
+        p.consider("a","战舰世界",now=100)
+        p.finish("a",sent=False)
+        for text in ["这个APP很好用", "happy birthday", "the printer works", "hello everyone"]:
+            self.assertIsNone(p.consider("a",text,now=101),text)
+
+    def test_ammo_abbreviations_still_work_next_to_chinese(self):
+        p=ConversationPolicy()
+        p.consider("a","战舰世界",now=100)
+        p.finish("a",sent=False)
+        for text in ["HE弹怎么用？", "AP什么时候换？", "PR多少算好？"]:
+            self.assertEqual(p.consider("a",text,now=101),"question")
+            p.finish("a",sent=False)
+
 
 class PresentationTests(unittest.TestCase):
     def test_collecting_never_draws_invented_recent_numbers(self):

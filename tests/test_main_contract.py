@@ -4,6 +4,7 @@ These exercise our actual entry point, not a live installed AstrBot server.
 The interfaces follow the checked AstrBot 4.29.1 and 4.29.3 source contracts.
 """
 import importlib.util
+import asyncio
 import json
 import logging
 import sys
@@ -202,6 +203,21 @@ class MainContractTests(unittest.IsolatedAsyncioTestCase):
         await self.plugin.wows_command(event)
         attached=next(x[1][0] for x in event.sent if x[0]=="chain")
         self.assertEqual(json.loads(Path(attached.file).read_text("utf-8")),source)
+
+    async def test_shutdown_closes_resources_when_sampler_already_failed(self):
+        async def failed_sampler():
+            raise OSError("fixture background failure")
+        self.plugin._sampler=asyncio.create_task(failed_sampler())
+        await asyncio.sleep(0)
+        with patch.object(self.plugin.wg,"close",new_callable=AsyncMock) as wg_close:
+            with patch.object(self.plugin.haojian,"close",new_callable=AsyncMock) as haojian_close:
+                await self.plugin.terminate()
+                wg_close.assert_awaited_once()
+                haojian_close.assert_awaited_once()
+        import sqlite3
+        with self.assertRaises(sqlite3.ProgrammingError):
+            self.plugin.storage.connection.execute("SELECT 1")
+        self.plugin._sampler=None
 
 
 if __name__=="__main__":
