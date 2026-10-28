@@ -1,0 +1,1 @@
+"""WoWS Captain for AstrBot."""

@@ -1,0 +1,16 @@
+{
+  "wg_application_id": {"description": "WG应用ID（国际服战绩查询必填）", "type": "string", "secret": true, "default": "", "hint": "在 developers.wargaming.net 申请，也可通过 WOWS_WG_APPLICATION_ID 环境变量提供。不是游戏密码。"},
+  "default_region": {"description": "默认服务器", "type": "string", "default": "asia", "options": ["asia", "eu", "na"]},
+  "chat_provider_id": {"description": "战术分析聊天模型", "type": "string", "default": "", "_special": "select_provider", "hint": "留空跟随当前会话模型。需在AstrBot配置可用聊天模型。"},
+  "vision_provider_id": {"description": "战绩截图识别模型", "type": "string", "default": "", "_special": "select_provider", "hint": "选择支持图片输入的模型；留空跟随当前会话模型。"},
+  "auto_reply_enabled": {"description": "主动参与战舰世界话题", "type": "bool", "default": true, "hint": "处理消息平台实际投递的消息，无需@。需平台允许接收普通群消息。"},
+  "auto_reply_sessions": {"description": "主动回复会话范围", "type": "list", "default": [], "_special": "umo", "hint": "留空表示所有已接入会话。可先在测试群启用。"},
+  "discussion_cooldown_seconds": {"description": "普通讨论插话间隔（秒）", "type": "int", "default": 120, "hint": "同会话一般讨论限频；明确疑问不受此间隔限制。同会话已有分析进行时不重复排队。"},
+  "snapshot_interval_minutes": {"description": "已绑定玩家战绩采样间隔（分钟）", "type": "int", "default": 60, "hint": "最低5分钟。近期战绩依赖快照，首次安装不能回溯未记录的数据。"},
+  "haojian_cookie_env": {"description": "浩舰会话Cookie的环境变量名", "type": "string", "default": "WOWS_HAOJIAN_COOKIE", "hint": "这里只填变量名；Cookie值在服务器环境中设置，勿在群聊发送。公开数据无需登录。"},
+  "haojian_cookie_file": {"description": "浩舰会话文件绝对路径（可选）", "type": "string", "default": "", "hint": "本人授权Cookie单行文本，位于插件代码目录之外。文件权限仅管理员可读；与环境变量二选一。"},
+  "font_path": {"description": "中文字体绝对路径（可选）", "type": "string", "default": "", "hint": "Windows自动找微软雅黑；Linux建议安装Noto CJK。无中文字体时图表使用英文标签。"},
+  "kokomi_bridge_url": {"description": "Kokomi V4桥接服务URL（可选）", "type": "string", "default": "", "hint": "例如 http://127.0.0.1:19090。原生/wows无需；/wws需要额外授权运行的Kokomi V4与其后端。"},
+  "kokomi_token_env": {"description": "Kokomi桥接密钥环境变量名", "type": "string", "default": "WOWS_KOKOMI_BRIDGE_TOKEN", "hint": "插件与桥接服务设置相同的随机密钥，至少24字符；不要填原作者后端账号密码。"},
+  "kokomi_platform": {"description": "Kokomi上游平台标识", "type": "string", "default": "qq_bot", "hint": "应与您获授权的Kokomi V4后端平台配置一致。"}
+}
