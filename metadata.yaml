@@ -1,7 +1,7 @@
 name: astrbot_plugin_wows_captain
 display_name: 战舰世界舰长助手
 desc: 三服战绩与图表、浩舰全模块参数、高级攻略和赛事检索、截图复盘、主动话题参与及可选Kokomi桥接。
-version: v1.0.0
+version: v1.0.1
 author: brochure325
 repo: https://github.com/brochure325/1
-astrbot_version: '>=4.29.3'
+astrbot_version: '>=4.29.1'

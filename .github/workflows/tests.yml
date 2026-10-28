@@ -9,13 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python: ['3.12', '3.13']
+        include:
+          - python: '3.12'
+            pillow: '12.3.0'
+          - python: '3.12'
+            pillow: '13.0.0'
+          - python: '3.13'
+            pillow: '13.0.0'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: python -m pip install -r requirements.txt
+      - name: Reproduce the Core Pillow constraint
+        run: python -c "from pathlib import Path; Path('core-constraints.txt').write_text('Pillow==${{ matrix.pillow }}\n')"
+      - run: python -m pip install -r requirements.txt -c core-constraints.txt
       - run: python -m compileall -q main.py core bridge scripts
       - run: python -m unittest discover -s tests -v
       - run: python scripts/doctor.py

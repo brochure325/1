@@ -1,7 +1,7 @@
 """Plugin command integration with explicit AstrBot interface doubles.
 
 These exercise our actual entry point, not a live installed AstrBot server.
-The interfaces follow the checked AstrBot 4.29.3 source contract.
+The interfaces follow the checked AstrBot 4.29.1 and 4.29.3 source contracts.
 """
 import importlib.util
 import json
