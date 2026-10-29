@@ -21,7 +21,7 @@
 5. 把解压后的原版包文件夹放到固定位置，例如 `D:\WoWS\Kokomi_Bot`。
 6. 进入此文件夹，寻找 `command_select.py`。这就是稍后 `--kokomi-root` 应指向的目录。如果它还套在一层同名目录里，继续进入，直到能看见这个文件。
 7. 按原版 V4 说明安装它自己的 Python 和依赖。原版历史文档的开发版本是 Python 3.8.10；如果你使用其他版本，需要先验证原版本身能运行。不要强行把原版依赖装到 AstrBot 的环境里。
-8. 打开原版自己的 `config.py`，找到 `API_URL`、`API_TYPE`、`API_USERNAME`、`API_PASSWORD`。向原版维护者取得你有权使用的数据接口和凭据，再填写。它们不是 WG application_id，也不是 AstrBot 模型密钥。
+8. 打开原版自己的 `config.py`，找到 `API_URL`、`API_TYPE`、`API_USERNAME`、`API_PASSWORD`。2026-10-29 静态检查官方 4.1.1 ZIP：这四项随包已有非空配置，可以先保留并测试；非空不代表当前有效或已通过鉴权。若运行提示授权失效，再联系原维护者取得可用接口与凭据。不要把随包配置公开到聊天或仓库。它们不是 WG application_id，也不是 AstrBot 模型密钥。
 9. 同一配置中把 `RETURN_PIC_TYPE` 改成 `'file'`；桥接需要读取原版生成的文件图片。不要设成 `'base64'`。
 10. `BOT_PLATFORM` 与稍后插件中的 `kokomi_platform` 保持一致，默认使用 `'qq_bot'`。原版还列出 `discord`、`qq_group`、`qq_guild`。
 11. 如果原版需要设置管理员，直接按原版配置设置实际用户 ID。本适配器不把消息中声明的 `is_admin` 或角色字段传给原版。
@@ -78,6 +78,28 @@
 10. 返回原版帮助以后，用原版命令绑定账号，再查询。不要把 `/wows bind` 的本地绑定当成原版 Kokomi 的绑定。
 
 ## 5. Docker / Linux
+
+### Linux 直接安装、使用 systemd 的续装脚本
+
+本节适用于已经在服务器完成独立环境准备、通过 `astrbot.service` 启动 AstrBot 的部署。脚本默认路径：AstrBot 在 `/opt/astrbot`；原版完整包已上传为 `/opt/kokomi-v4/Kokomi_Bot-full.zip`；独立 Python 为 `/opt/kokomi-v4/.venv/bin/python`；AstrBot 的 uv 环境为 `/root/.local/share/uv/tools/astrbot/bin/python`。路径不同请先调整，不要照搬本节。
+
+1. 打开服务器 root 终端，确认顶部是 Shell 模式。
+2. 下载本仓库的 `scripts/install_kokomi_linux.py`。若服务器下载 GitHub 小文件也失败，可在电脑下载脚本，再上传到 `/opt/kokomi-v4/install_kokomi_linux.py`。
+3. 执行：
+
+   ```bash
+   /opt/kokomi-v4/.venv/bin/python /opt/kokomi-v4/install_kokomi_linux.py
+   ```
+
+4. 脚本会检查 ZIP CRC 和 V4 目录结构，解压到独立的 `release` 子目录；已有完整引擎会复用，已有不完整目录会报错并保留。原版 `config.py` 只修改 `RETURN_PIC_TYPE` 为 `file`，保留接口凭据和其他设置。
+5. 它生成本机桥接密钥并保存在权限为 600 的 `bridge.env`，已有符合格式的密钥会复用。随后创建 `kokomi-bridge.service`，只监听 `127.0.0.1:19090`，通过健康检查并调用一次真实 `wws help`。这些检查失败时，不会改写 AstrBot 的配置。
+6. 指令传输成功后，它只更新插件配置中的桥接 URL、密钥环境变量名与平台标识，保留其他设置；向 `astrbot.service` 添加专用环境变量文件，重启 AstrBot 并核对进程读取的密钥。重启失败会还原这一步的配置并尝试恢复启动。最后启用桥接开机启动。安装中 AstrBot 会短暂重启。
+7. 出现 `ASTRBOT_CONNECTED` 后，在机器人聊天中发送 `/wws help`。必须确认收到的是原版帮助，而不是原版返回的错误文字。再按帮助执行原版账号绑定、战绩和榜单查询。两套绑定不会自动同步。
+8. 变更前的文件在 `/opt/kokomi-v4/backups/`；帮助响应在权限受限的 `/opt/kokomi-v4/verification/`。失败时可以提供 `INSTALL_INCOMPLETE` 那一行，不要直接公开原始配置或日志。
+
+本脚本的文件校验、配置保留、备份还原有自动化测试；没有在目标服务器执行脚本，不能据此称已经部署成功。收到帮助也不证明旧版上游历史和排行榜接口当前全部可用。
+
+### 手动启动与 Docker
 
 桥接仍在 Kokomi 自己的环境中运行：
 
